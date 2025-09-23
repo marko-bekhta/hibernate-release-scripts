@@ -101,7 +101,9 @@ for (( i=0; i<$NUMBER_OF_PUBLISH_LOCATIONS; i++ )); do
   echo "================================================================================"
   echo "Publishing to $REMOTE_DIRECTORY"
   echo "================================================================================"
-  rsync -rzh --progress --delete ${DOCUMENTATION_DIRECTORY}/ ${REMOTE_DIRECTORY}${PROJECT}/$VERSION_FAMILY
+  # Using the --mkpath to make sure that all the parent directories are in place for the sync to complete successfully,
+  # otherwise if one of the parent dirs is missing rsync will fail ...
+  rsync -rzh --mkpath --progress --delete ${DOCUMENTATION_DIRECTORY}/ ${REMOTE_DIRECTORY}${PROJECT}/$VERSION_FAMILY
 
   # If the release is the new stable one, we need to update the doc server (outdated content descriptor and /stable/ symlink)
   if [ REQUIRES_OUTDATED_CONTENT_UPDATE -eq 1 ]; then
@@ -123,7 +125,7 @@ for (( i=0; i<$NUMBER_OF_PUBLISH_LOCATIONS; i++ )); do
         # filemgmt-prod*.jboss.org don't allow scp, so we'll just rsync a single file...
         # Note we have to use filemgmt-prod-sync.jboss.org for rsync, not filemgmt.jboss.org or filemgmt-prod.jboss.org
         # That's a bit overkill but at least it works.
-        rsync -z --progress ${PROJECT}-updated.json ${REMOTE_DIRECTORY}_outdated-content/${PROJECT}.json
+        rsync -z --mkpath --progress ${PROJECT}-updated.json ${REMOTE_DIRECTORY}_outdated-content/${PROJECT}.json
         rm -f ${PROJECT}-updated.json
 
         # update the symlink of stable to the latest release
